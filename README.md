@@ -1,4 +1,4 @@
-indexed-db-angular-service
-==========================
+IndexedDB
+=========
 
-AngularJS service to connect and work upon indexedDB
+AngularJS wrapper over the browser indexedDB object.

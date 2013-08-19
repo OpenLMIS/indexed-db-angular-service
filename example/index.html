@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html ng-app="indexedDbExample">
+<head>
+  <title>Indexed DB example</title>
+
+  <script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular.min.js" type="text/javascript"></script>
+  <script src="../js/services/indexed-db.js" type="text/javascript"></script>
+
+  <script src="js/app.js" type="text/javascript"></script>
+  <script src="js/migrations.js" type="text/javascript"></script>
+  <script src="js/controller/app-setup-controller.js" type="text/javascript"></script>
+</head>
+<body>
+<form ng-controller="AppSetupController as controller">
+  <input placeholder="Code" ng-model="controller.sample.code"><br><br>
+  <input placeholder="Name" ng-model="controller.sample.name"><br><br>
+  <input type="button" ng-click="controller.save()" value="Save">
+</form>
+</body>
+</html>
