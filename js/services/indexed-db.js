@@ -55,17 +55,33 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
       return transaction;
     }
 
-    var get = function (objectStore, operationKey, successFunc, errorFunc) {
+    var get = function (objectStore, operationKey, onRequestSuccess, onRequestError, onTransactionSuccess, onTransactionError) {
       execute(function (connection) {
-        var transaction = getTransaction(connection, objectStore, "readonly", successFunc, errorFunc);
-        transaction.objectStore(objectStore).get(operationKey);
+        var transaction = getTransaction(connection, objectStore, "readonly", onTransactionSuccess, onTransactionError);
+        var request = transaction.objectStore(objectStore).get(operationKey);
+        request.onsuccess = function (e) {
+          if (onRequestSuccess) onRequestSuccess(e);
+          if (!$rootScope.$$phase) $rootScope.$apply();
+        };
+        request.onerror = function (e) {
+          if (onRequestError) onRequestError(e);
+          if (!$rootScope.$$phase) $rootScope.$apply();
+        };
       });
     };
 
-    var put = function (objectStore, data, successFunc, errorFunc) {
+    var put = function (objectStore, data, onRequestSuccess, onRequestError, onTransactionSuccess, onTransactionError) {
       execute(function (connection) {
-        var transaction = getTransaction(connection, objectStore, "readwrite", successFunc, errorFunc);
-        transaction.objectStore(objectStore).put(data);
+        var transaction = getTransaction(connection, objectStore, "readwrite", onTransactionSuccess, onTransactionError);
+        var request = transaction.objectStore(objectStore).put(data);
+        request.onsuccess = function (e) {
+          if (onRequestSuccess) onRequestSuccess(e);
+          if (!$rootScope.$$phase) $rootScope.$apply();
+        };
+        request.onerror = function (e) {
+          if (onRequestError) onRequestError(e);
+          if (!$rootScope.$$phase) $rootScope.$apply();
+        };
       });
 
     };
