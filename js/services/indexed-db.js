@@ -45,11 +45,11 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
     function getTransaction(connection, objectStore, mode, successFunc, errorFunc) {
       var transaction = connection.transaction(objectStore, mode);
       transaction.oncomplete = function (e) {
-        if (successFunc) successFunc(e);
+        if (typeof successFunc === 'function') successFunc(e);
         if (!$rootScope.$$phase) $rootScope.$apply();
       };
       transaction.onerror = function (e) {
-        if (errorFunc) errorFunc(e);
+        if (typeof errorFunc === 'function') errorFunc(e);
         if (!$rootScope.$$phase) $rootScope.$apply();
       };
       return transaction;
@@ -60,11 +60,11 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
         var transaction = getTransaction(connection, objectStore, "readonly", onTransactionSuccess, onTransactionError);
         var request = transaction.objectStore(objectStore).get(operationKey);
         request.onsuccess = function (e) {
-          if (onRequestSuccess) onRequestSuccess(e);
+          if (typeof onRequestSuccess === 'function') onRequestSuccess(e);
           if (!$rootScope.$$phase) $rootScope.$apply();
         };
         request.onerror = function (e) {
-          if (onRequestError) onRequestError(e);
+          if (typeof onRequestError === 'function') onRequestError(e);
           if (!$rootScope.$$phase) $rootScope.$apply();
         };
       });
@@ -75,11 +75,11 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
         var transaction = getTransaction(connection, objectStore, "readwrite", onTransactionSuccess, onTransactionError);
         var request = transaction.objectStore(objectStore).put(data);
         request.onsuccess = function (e) {
-          if (onRequestSuccess) onRequestSuccess(e);
+          if (typeof onRequestSuccess === 'function') onRequestSuccess(e);
           if (!$rootScope.$$phase) $rootScope.$apply();
         };
         request.onerror = function (e) {
-          if (onRequestError) onRequestError(e);
+          if (typeof onRequestError === 'function') onRequestError(e);
           if (!$rootScope.$$phase) $rootScope.$apply();
         };
       });
