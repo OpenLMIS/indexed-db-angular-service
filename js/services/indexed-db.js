@@ -55,7 +55,18 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
       return transaction;
     }
 
-    var get = function (objectStore, operationKey, onRequestSuccess, onRequestError, onTransactionSuccess, onTransactionError) {
+    function removeHashKey(data) {
+      for (var key in data) {
+        var item = data[key];
+        if (key === '$$hashKey') delete data[key];
+        if (typeof item == "object") {
+          removeHashKey(item);
+        }
+      }
+    }
+
+    var get = function (objectStore, operationKey, onRequestSuccess, onRequestError, onTransactionSuccess,
+                        onTransactionError) {
       execute(function (connection) {
         var transaction = getTransaction(connection, objectStore, "readonly", onTransactionSuccess, onTransactionError);
         var request = transaction.objectStore(objectStore).get(operationKey);
@@ -71,8 +82,10 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
     };
 
     var put = function (objectStore, data, onRequestSuccess, onRequestError, onTransactionSuccess, onTransactionError) {
+      removeHashKey(data);
       execute(function (connection) {
-        var transaction = getTransaction(connection, objectStore, "readwrite", onTransactionSuccess, onTransactionError);
+        var transaction = getTransaction(connection, objectStore, "readwrite", onTransactionSuccess,
+            onTransactionError);
         var request = transaction.objectStore(objectStore).put(data);
         request.onsuccess = function (e) {
           if (typeof onRequestSuccess === 'function') onRequestSuccess(e);
