@@ -58,10 +58,10 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
     function removeHashKey(data) {
       for (var key in data) {
         var item = data[key];
-        if (key === '$$hashKey') delete data[key];
+        if (key === '$$hashKey') delete item;
         if (typeof item == "object") {
           removeHashKey(item);
-        }
+        } else if(typeof item === "string") item = item.trim();
       }
     }
 
