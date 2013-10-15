@@ -1,17 +1,8 @@
-/*
- * This program is part of the OpenLMIS logistics management information system platform software.
- * Copyright © 2013 VillageReach
- *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- *  
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
- * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
- */
-
 angular.module('IndexedDB', []).provider('IndexedDB', function () {
 
   var thisService = this;
   var db, onUpgrade, version;
+  var FUNCTION = 'function';
 
   thisService.setDbName = function (name) {
     db = name;
@@ -55,64 +46,57 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
     function getTransaction(connection, objectStore, mode, successFunc, errorFunc) {
       var transaction = connection.transaction(objectStore, mode);
       transaction.oncomplete = function (e) {
-        if (typeof successFunc === 'function') successFunc(e);
+        if (typeof successFunc === FUNCTION) successFunc(e);
         if (!$rootScope.$$phase) $rootScope.$apply();
       };
       transaction.onerror = function (e) {
-        if (typeof errorFunc === 'function') errorFunc(e);
+        if (typeof errorFunc === FUNCTION) errorFunc(e);
         if (!$rootScope.$$phase) $rootScope.$apply();
       };
       return transaction;
     }
 
-    function removeHashKey(data) {
-      for (var key in data) {
-        var item = data[key];
-        if (key === '$$hashKey') delete item;
-        if (typeof item == "object") {
-          removeHashKey(item);
-        } else if(typeof item === "string") item = item.trim();
-      }
+    function evaluateRequest(request, onRequestSuccess, onRequestError) {
+      request.onsuccess = function (e) {
+        if (typeof onRequestSuccess === FUNCTION) onRequestSuccess(e);
+        if (!$rootScope.$$phase) $rootScope.$apply();
+      };
+      request.onerror = function (e) {
+        if (typeof onRequestError === FUNCTION) onRequestError(e);
+        if (!$rootScope.$$phase) $rootScope.$apply();
+      };
     }
 
-    var get = function (objectStore, operationKey, onRequestSuccess, onRequestError, onTransactionSuccess,
-                        onTransactionError) {
+    var get = function (objectStore, operationKey, onRequestSuccess, onRequestError, onTransactionSuccess, onTransactionError) {
       execute(function (connection) {
         var transaction = getTransaction(connection, objectStore, "readonly", onTransactionSuccess, onTransactionError);
         var request = transaction.objectStore(objectStore).get(operationKey);
-        request.onsuccess = function (e) {
-          if (typeof onRequestSuccess === 'function') onRequestSuccess(e);
-          if (!$rootScope.$$phase) $rootScope.$apply();
-        };
-        request.onerror = function (e) {
-          if (typeof onRequestError === 'function') onRequestError(e);
-          if (!$rootScope.$$phase) $rootScope.$apply();
-        };
+        evaluateRequest(request, onRequestSuccess, onRequestError);
       });
     };
 
     var put = function (objectStore, data, onRequestSuccess, onRequestError, onTransactionSuccess, onTransactionError) {
-      removeHashKey(data);
       execute(function (connection) {
-        var transaction = getTransaction(connection, objectStore, "readwrite", onTransactionSuccess,
-            onTransactionError);
+        var transaction = getTransaction(connection, objectStore, "readwrite", onTransactionSuccess, onTransactionError);
         var request = transaction.objectStore(objectStore).put(data);
-        request.onsuccess = function (e) {
-          if (typeof onRequestSuccess === 'function') onRequestSuccess(e);
-          if (!$rootScope.$$phase) $rootScope.$apply();
-        };
-        request.onerror = function (e) {
-          if (typeof onRequestError === 'function') onRequestError(e);
-          if (!$rootScope.$$phase) $rootScope.$apply();
-        };
+        evaluateRequest(request, onRequestSuccess, onRequestError);
       });
 
+    };
+
+    var deleteRecord = function (objectStore, operationKey, onRequestSuccess, onRequestError, onTransactionSuccess, onTransactionError) {
+      execute(function (connection) {
+        var transaction = getTransaction(connection, objectStore, "readwrite", onTransactionSuccess, onTransactionError);
+        var request = transaction.objectStore(objectStore).delete(operationKey);
+        evaluateRequest(request, onRequestSuccess, onRequestError);
+      });
     };
 
     return {
       execute: execute,
       get: get,
-      put: put
+      put: put,
+      delete: deleteRecord
     }
 
   }
