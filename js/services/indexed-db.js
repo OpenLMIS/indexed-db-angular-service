@@ -41,7 +41,7 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
       } else {
         transactionFunction(indexedDBConnection);
       }
-    };
+    };   
 
     function getTransaction(connection, objectStore, mode, successFunc, errorFunc) {
       var transaction = connection.transaction(objectStore, mode);
