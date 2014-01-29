@@ -16,7 +16,6 @@ angular.module('IndexedDB', []).provider('IndexedDB', function () {
   };
 
   this.$get = function ($rootScope, $q) {
-
     var deferred = $q.defer();
     var request = indexedDB.open(db, version);
     var indexedDBConnection = null;
